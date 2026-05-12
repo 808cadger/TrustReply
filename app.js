@@ -2,6 +2,8 @@
 
 const API_URL = 'https://api.anthropic.com/v1/messages';
 const STORAGE_KEY = 'trustreply_settings';
+const MAX_TASK_CHARS = 6000;
+const REQUEST_TIMEOUT_MS = 30000;
 
 const DEFAULT_SETTINGS = {
   apiKey: '',
@@ -49,6 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
   els.dialog = document.getElementById('settings-dialog');
   els.apiKey = document.getElementById('api-key-input');
   els.model = document.getElementById('model-input');
+  els.run = document.getElementById('run-button');
+  els.consent = document.getElementById('third-party-consent');
+  els.taskCount = document.getElementById('task-count');
+  els.taskWarning = document.getElementById('task-warning');
 
   document.getElementById('settings-button').addEventListener('click', openSettings);
   document.getElementById('save-button').addEventListener('click', saveSettings);
@@ -57,10 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('copy-button').addEventListener('click', copyResult);
   document.getElementById('sample-scan').addEventListener('click', () => setSample('scan'));
   document.getElementById('sample-code').addEventListener('click', () => setSample('code'));
+  document.getElementById('clear-task').addEventListener('click', clearTask);
+  els.task.addEventListener('input', updateTaskMeta);
+  els.consent.addEventListener('change', updateTaskMeta);
 
   const settings = loadSettings();
   els.apiKey.value = settings.apiKey;
   els.model.value = settings.model;
+  updateTaskMeta();
 
   if ('serviceWorker' in navigator) {
     // The scope is local to this app folder, preventing control of sibling apps.
@@ -78,9 +88,18 @@ function loadSettings() {
 
 function saveSettings(event) {
   event.preventDefault();
+  const apiKey = els.apiKey.value.trim();
+  const model = els.model.value.trim() || DEFAULT_SETTINGS.model;
+
+  if (apiKey && !apiKey.startsWith('sk-ant-')) {
+    setStatus('Invalid key format', 'error');
+    setOutput('Summary: The API key was not saved because it does not look like an Anthropic key.\nRisk: Medium — Saving malformed or copied secrets can cause failed requests or accidental exposure; mitigation is to verify the key source and use a restricted prototype key.\nActions:\n- Enter a key that starts with ```sk-ant-```.\n- Safer alternative: leave the key blank and test the UI without making provider calls.\nSources: none');
+    return;
+  }
+
   const next = {
-    apiKey: els.apiKey.value.trim(),
-    model: els.model.value.trim() || DEFAULT_SETTINGS.model
+    apiKey,
+    model
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   els.dialog.close();
@@ -105,6 +124,14 @@ function openSettings() {
 function setSample(name) {
   els.task.value = samples[name];
   els.task.focus();
+  updateTaskMeta();
+}
+
+function clearTask() {
+  els.task.value = '';
+  els.consent.checked = false;
+  updateTaskMeta();
+  setStatus('Task cleared', 'ready');
 }
 
 async function generateReply() {
@@ -112,7 +139,20 @@ async function generateReply() {
   const settings = loadSettings();
 
   if (!task) {
+    setStatus('Task needed', 'error');
     setOutput('Summary: Add a task before generating a response.\nRisk: Low — No external request was made; mitigation is to enter only the minimum details required.\nActions:\n- Enter a task in the Task description box.\n- Use a sample prompt to preview the required response format.\nSources: none');
+    return;
+  }
+
+  if (task.length > MAX_TASK_CHARS) {
+    setStatus('Task too long', 'error');
+    setOutput(`Summary: The task is too long to send from this prototype.\nRisk: Medium — Oversized prompts are harder to review for private data; mitigation is to reduce the task to ${MAX_TASK_CHARS} characters or less.\nActions:\n- Remove unrelated text and sensitive details.\n- Safer alternative: summarize the document locally before asking TrustReply to format the response.\nSources: none`);
+    return;
+  }
+
+  if (!els.consent.checked) {
+    setStatus('Consent needed', 'error');
+    setOutput('Summary: TrustReply needs your explicit consent before sending this task to Anthropic.\nRisk: Medium — The task may contain private or identifying data; mitigation is to review and minimize the text before sharing it with a third-party model provider.\nActions:\n- Remove secrets, credentials, and unnecessary personal details.\n- Check the consent box only when you are ready to send the task to Anthropic.\n- Safer alternative: use the app locally for format guidance without pressing Generate.\nSources: none');
     return;
   }
 
@@ -123,10 +163,15 @@ async function generateReply() {
   }
 
   setStatus('Generating', 'busy');
+  setBusy(true);
+  let timeoutId;
 
   try {
+    const controller = new AbortController();
+    timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     const response = await fetch(API_URL, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': settings.apiKey,
@@ -138,9 +183,11 @@ async function generateReply() {
         model: settings.model,
         max_tokens: 900,
         system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: task }]
+        messages: [{ role: 'user', content: buildUserContent(task) }]
       })
     });
+    window.clearTimeout(timeoutId);
+    timeoutId = null;
 
     const data = await response.json();
     if (!response.ok) {
@@ -152,8 +199,16 @@ async function generateReply() {
     setStatus('Complete', 'ready');
   } catch (error) {
     setStatus('Error', 'error');
-    setOutput(`Summary: The request could not be completed.\nRisk: Medium — The task may not have been analyzed; mitigation is to avoid acting on suspicious content until it is checked.\nActions:\n- Verify your API key and network connection.\n- Safer alternative: use offline heuristics and do not click links or run commands until live checks work.\nSources: none\nNotes: ${error.message}`);
+    const reason = error.name === 'AbortError' ? 'The request timed out after 30 seconds.' : error.message;
+    setOutput(`Summary: The request could not be completed.\nRisk: Medium — The task may not have been analyzed; mitigation is to avoid acting on suspicious content until it is checked.\nActions:\n- Verify your API key and network connection.\n- Safer alternative: use offline heuristics and do not click links or run commands until live checks work.\nSources: none\nNotes: ${reason}`);
+  } finally {
+    if (timeoutId) window.clearTimeout(timeoutId);
+    setBusy(false);
   }
+}
+
+function buildUserContent(task) {
+  return `Task:\n${task}\n\nConstraints: Use the exact TrustReply output structure. Do not fabricate live external checks.`;
 }
 
 function enforceSkeleton(reply) {
@@ -183,4 +238,28 @@ function setStatus(label, state) {
   els.status.classList.remove('busy', 'error');
   if (state === 'busy') els.status.classList.add('busy');
   if (state === 'error') els.status.classList.add('error');
+}
+
+function setBusy(isBusy) {
+  els.run.disabled = isBusy;
+  els.run.textContent = isBusy ? 'Generating...' : 'Generate';
+}
+
+function updateTaskMeta() {
+  const text = els.task.value;
+  els.taskCount.textContent = `${text.length} / ${MAX_TASK_CHARS}`;
+
+  const warning = getPrivacyWarning(text);
+  els.taskWarning.textContent = warning || 'Keep secrets and unnecessary personal data out of prompts.';
+  els.taskWarning.classList.toggle('warning', Boolean(warning));
+}
+
+function getPrivacyWarning(text) {
+  if (!text.trim()) return '';
+  if (/sk-[a-z0-9_-]{8,}/i.test(text)) return 'Possible API key detected. Remove secrets before sending.';
+  if (/\b\d{3}-\d{2}-\d{4}\b/.test(text)) return 'Possible SSN detected. Remove sensitive identifiers before sending.';
+  if (/\b(?:\d[ -]*?){13,19}\b/.test(text)) return 'Possible payment card number detected. Remove financial data before sending.';
+  if (/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(text)) return 'Email address detected. Share only if needed for the task.';
+  if (/\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b/.test(text)) return 'Phone number detected. Share only if needed for the task.';
+  return '';
 }

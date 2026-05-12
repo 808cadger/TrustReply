@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">TrustReply app icon</title>
+  <desc id="desc">A shield with structured reply lines.</desc>
+  <rect width="512" height="512" rx="96" fill="#101820"/>
+  <path d="M256 72 384 120v104c0 93-52 167-128 216-76-49-128-123-128-216V120l128-48Z" fill="#2d7d7b"/>
+  <path d="M256 108 348 142v82c0 70-34 128-92 169-58-41-92-99-92-169v-82l92-34Z" fill="#f7fbfb"/>
+  <path d="M206 205h100" stroke="#101820" stroke-width="22" stroke-linecap="round"/>
+  <path d="M206 258h100" stroke="#101820" stroke-width="22" stroke-linecap="round"/>
+  <path d="M206 311h62" stroke="#2d7d7b" stroke-width="22" stroke-linecap="round"/>
+</svg>

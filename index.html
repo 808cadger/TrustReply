@@ -11,6 +11,7 @@
   <meta name="description" content="TrustReply is a local-first security assistant that formats every answer with risk, actions, sources, and notes." />
   <title>TrustReply</title>
   <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -18,6 +19,7 @@
     <div>
       <p class="eyebrow">Security-first AI assistant</p>
       <h1>TrustReply</h1>
+      <p class="header-subtitle">Structured answers with risk, actions, sources, and privacy limits.</p>
     </div>
     <button id="settings-button" class="icon-button" type="button" aria-label="Open settings" title="Settings">⚙</button>
   </header>
@@ -33,11 +35,21 @@
       </div>
 
       <label class="field-label" for="task-input">Task description</label>
-      <textarea id="task-input" rows="10" placeholder="Example: Scan this URL for phishing risk: https://example.com"></textarea>
+      <textarea id="task-input" rows="10" maxlength="6000" spellcheck="true" placeholder="Example: Scan this URL for phishing risk: https://example.com"></textarea>
+      <div class="task-meta">
+        <span id="task-count">0 / 6000</span>
+        <span id="task-warning">Keep secrets and unnecessary personal data out of prompts.</span>
+      </div>
+
+      <label class="consent-row" for="third-party-consent">
+        <input id="third-party-consent" type="checkbox" />
+        <span>I understand Generate sends this task directly from my browser to Anthropic for processing.</span>
+      </label>
 
       <div class="toolbar">
         <button class="secondary-button" id="sample-scan" type="button">URL scan sample</button>
         <button class="secondary-button" id="sample-code" type="button">PWA code sample</button>
+        <button class="secondary-button" id="clear-task" type="button">Clear</button>
         <button class="primary-button" id="run-button" type="button">Generate</button>
       </div>
     </section>
@@ -50,7 +62,7 @@
         </div>
         <button class="secondary-button compact" id="copy-button" type="button">Copy</button>
       </div>
-      <pre id="result-output" class="result-output">Summary: Enter a task and generate a security-scoped response.
+      <pre id="result-output" class="result-output" aria-live="polite">Summary: Enter a task and generate a security-scoped response.
 Risk: Low — No data has been sent yet; mitigation is to keep sensitive details out of prompts unless required.
 Actions:
 - Keep secrets, private keys, and personal data out of test prompts.
@@ -61,12 +73,24 @@ Notes: Direct AI calls require a user-provided Anthropic API key.</pre>
 
     <aside class="side-panel" aria-labelledby="guardrails-heading">
       <h2 id="guardrails-heading">Guardrails</h2>
-      <ul>
-        <li>Refuses malware, credential theft, bypasses, and de-anonymization.</li>
-        <li>Adds a Risk line for code, commands, downloads, links, and executable steps.</li>
-        <li>Uses placeholders for live URL, malware, price, travel, and third-party checks.</li>
-        <li>Defaults to minimal telemetry and local-only storage.</li>
-      </ul>
+      <div class="guardrail-grid">
+        <div>
+          <strong>Refusal boundary</strong>
+          <p>Blocks malware, credential theft, bypasses, and de-anonymization.</p>
+        </div>
+        <div>
+          <strong>Risk labels</strong>
+          <p>Requires risk and mitigation language for commands, links, code, and downloads.</p>
+        </div>
+        <div>
+          <strong>No fake scans</strong>
+          <p>Uses placeholders for live URL, malware, price, travel, and third-party checks.</p>
+        </div>
+        <div>
+          <strong>Local first</strong>
+          <p>Defaults to minimal telemetry and local-only app storage.</p>
+        </div>
+      </div>
       <div class="privacy-box">
         <strong>Privacy model</strong>
         <p>Your task and API key stay in this browser except when you press Generate, which sends the task to Anthropic from your device.</p>
@@ -82,11 +106,11 @@ Notes: Direct AI calls require a user-provided Anthropic API key.</pre>
       </div>
 
       <label class="field-label" for="api-key-input">Anthropic API key</label>
-      <input id="api-key-input" type="password" autocomplete="off" placeholder="sk-ant-..." />
+      <input id="api-key-input" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-..." />
       <p class="help-text">Stored in this browser only. IndexedDB is recommended for future encrypted app data; this prototype uses localStorage for the user-provided key.</p>
 
       <label class="field-label" for="model-input">Model</label>
-      <input id="model-input" type="text" value="claude-sonnet-4-6" />
+      <input id="model-input" type="text" autocapitalize="off" spellcheck="false" value="claude-sonnet-4-6" />
 
       <div class="dialog-actions">
         <button class="danger-button" id="clear-button" type="button">Clear local data</button>

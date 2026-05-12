@@ -58,6 +58,8 @@ TrustReply is a static PWA prototype with a deliberately small attack surface.
 | Service Worker | Registered with `scope: './'` so it controls only this app folder. |
 | API calls | Anthropic calls are made directly from the browser for prototype simplicity. |
 | Caching | Provider API calls are never cached by the Service Worker. |
+| Consent | Generate is gated by an explicit third-party sharing acknowledgement. |
+| Input limits | Tasks are capped at 6,000 characters and checked for common sensitive-data patterns before sending. |
 | Storage | Settings are stored locally in this browser. |
 | Telemetry | No app telemetry is sent by this prototype. |
 
@@ -138,6 +140,7 @@ npm run check
 ```text
 TrustReply/
 ├── app.js          # UI behavior, Anthropic request, response skeleton enforcement
+├── icon.svg        # PWA icon
 ├── index.html      # App shell, CSP, settings dialog
 ├── manifest.json   # PWA metadata
 ├── package.json    # Local scripts
@@ -152,7 +155,7 @@ TrustReply/
 - Add configurable scanner integrations with explicit consent prompts.
 - Add exportable audit history for generated responses.
 - Add automated browser tests for CSP, Service Worker scope, and output rendering.
-- Add app icons and install screenshots.
+- Add install screenshots and hosted demo deployment.
 
 ## Positioning
 

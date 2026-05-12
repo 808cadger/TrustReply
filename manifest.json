@@ -1,0 +1,12 @@
+{
+  "name": "TrustReply",
+  "short_name": "TrustReply",
+  "description": "A local-first security assistant that produces structured risk-aware replies.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f7f8",
+  "theme_color": "#101820",
+  "icons": []
+}

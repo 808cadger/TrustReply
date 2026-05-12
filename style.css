@@ -1,0 +1,271 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f7f8;
+  color: #101820;
+}
+
+button, input, textarea {
+  font: inherit;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem clamp(1rem, 4vw, 2rem);
+  background: #101820;
+  color: #f7fbfb;
+  border-bottom: 4px solid #2d7d7b;
+}
+
+.eyebrow {
+  margin: 0 0 0.2rem;
+  color: #a9d6d3;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1, h2, p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+
+h2 {
+  margin-bottom: 0.25rem;
+  font-size: 1.05rem;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem clamp(1rem, 4vw, 2rem) 2rem;
+}
+
+.workspace,
+.result-panel,
+.side-panel {
+  background: #ffffff;
+  border: 1px solid #d8e1e4;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(16, 24, 32, 0.08);
+}
+
+.workspace,
+.result-panel {
+  padding: 1rem;
+}
+
+.side-panel {
+  grid-column: 1 / -1;
+  padding: 1rem;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel-heading p,
+.help-text,
+.side-panel li,
+.privacy-box p {
+  color: #4c5b63;
+  line-height: 1.5;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #26343a;
+}
+
+textarea,
+input {
+  width: 100%;
+  border: 1px solid #bccbd0;
+  border-radius: 8px;
+  background: #fbfdfd;
+  color: #101820;
+  padding: 0.8rem;
+}
+
+textarea {
+  min-height: 260px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+textarea:focus,
+input:focus {
+  outline: 3px solid rgba(45, 125, 123, 0.25);
+  border-color: #2d7d7b;
+}
+
+.toolbar,
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 0.8rem;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 42px;
+  padding: 0.65rem 0.95rem;
+  font-weight: 800;
+}
+
+.primary-button {
+  background: #2d7d7b;
+  color: #ffffff;
+}
+
+.secondary-button {
+  background: #e8eff1;
+  color: #15262d;
+}
+
+.danger-button {
+  background: #8c1d18;
+  color: #ffffff;
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.12);
+  color: inherit;
+}
+
+.compact {
+  min-height: 36px;
+  padding: 0.45rem 0.75rem;
+}
+
+.status-pill {
+  white-space: nowrap;
+  border-radius: 999px;
+  background: #dff2ea;
+  color: #115c39;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.status-pill.busy {
+  background: #fff1cc;
+  color: #755100;
+}
+
+.status-pill.error {
+  background: #fde0dd;
+  color: #8c1d18;
+}
+
+.result-output {
+  min-height: 412px;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: 8px;
+  background: #101820;
+  color: #eaf6f5;
+  padding: 1rem;
+  line-height: 1.55;
+}
+
+.side-panel ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.side-panel li + li {
+  margin-top: 0.45rem;
+}
+
+.privacy-box {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-left: 4px solid #2d7d7b;
+  background: #edf7f5;
+  border-radius: 6px;
+}
+
+.settings-dialog {
+  width: min(560px, calc(100vw - 2rem));
+  border: 0;
+  border-radius: 8px;
+  padding: 0;
+  color: #101820;
+  box-shadow: 0 18px 70px rgba(16, 24, 32, 0.32);
+}
+
+.settings-dialog::backdrop {
+  background: rgba(16, 24, 32, 0.58);
+}
+
+.settings-dialog form {
+  padding: 1rem;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dialog-header .icon-button {
+  background: #e8eff1;
+  color: #101820;
+}
+
+.help-text {
+  margin: 0.45rem 0 1rem;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 820px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-heading,
+  .toolbar,
+  .dialog-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .status-pill {
+    align-self: flex-start;
+  }
+}

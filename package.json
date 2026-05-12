@@ -1,0 +1,11 @@
+{
+  "name": "trustreply",
+  "version": "0.1.0",
+  "description": "Local-first security assistant PWA with structured risk-aware responses.",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8091",
+    "check": "node --check app.js && node --check sw.js"
+  },
+  "license": "Apache-2.0"
+}

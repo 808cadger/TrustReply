@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; connect-src 'self' https://api.anthropic.com; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+  />
+  <meta name="theme-color" content="#101820" />
+  <meta name="description" content="TrustReply is a local-first security assistant that formats every answer with risk, actions, sources, and notes." />
+  <title>TrustReply</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Security-first AI assistant</p>
+      <h1>TrustReply</h1>
+    </div>
+    <button id="settings-button" class="icon-button" type="button" aria-label="Open settings" title="Settings">⚙</button>
+  </header>
+
+  <main class="app-layout">
+    <section class="workspace" aria-labelledby="task-heading">
+      <div class="panel-heading">
+        <div>
+          <h2 id="task-heading">Task</h2>
+          <p>Paste a request and TrustReply will enforce the security response format.</p>
+        </div>
+        <span id="status-pill" class="status-pill">Local first</span>
+      </div>
+
+      <label class="field-label" for="task-input">Task description</label>
+      <textarea id="task-input" rows="10" placeholder="Example: Scan this URL for phishing risk: https://example.com"></textarea>
+
+      <div class="toolbar">
+        <button class="secondary-button" id="sample-scan" type="button">URL scan sample</button>
+        <button class="secondary-button" id="sample-code" type="button">PWA code sample</button>
+        <button class="primary-button" id="run-button" type="button">Generate</button>
+      </div>
+    </section>
+
+    <section class="result-panel" aria-labelledby="result-heading">
+      <div class="panel-heading">
+        <div>
+          <h2 id="result-heading">Structured reply</h2>
+          <p>Responses are rendered as text to avoid script injection from model output.</p>
+        </div>
+        <button class="secondary-button compact" id="copy-button" type="button">Copy</button>
+      </div>
+      <pre id="result-output" class="result-output">Summary: Enter a task and generate a security-scoped response.
+Risk: Low — No data has been sent yet; mitigation is to keep sensitive details out of prompts unless required.
+Actions:
+- Keep secrets, private keys, and personal data out of test prompts.
+- Use the sample buttons to preview the expected format.
+Sources: none
+Notes: Direct AI calls require a user-provided Anthropic API key.</pre>
+    </section>
+
+    <aside class="side-panel" aria-labelledby="guardrails-heading">
+      <h2 id="guardrails-heading">Guardrails</h2>
+      <ul>
+        <li>Refuses malware, credential theft, bypasses, and de-anonymization.</li>
+        <li>Adds a Risk line for code, commands, downloads, links, and executable steps.</li>
+        <li>Uses placeholders for live URL, malware, price, travel, and third-party checks.</li>
+        <li>Defaults to minimal telemetry and local-only storage.</li>
+      </ul>
+      <div class="privacy-box">
+        <strong>Privacy model</strong>
+        <p>Your task and API key stay in this browser except when you press Generate, which sends the task to Anthropic from your device.</p>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="settings-dialog" class="settings-dialog">
+    <form method="dialog">
+      <div class="dialog-header">
+        <h2>Settings</h2>
+        <button class="icon-button" value="cancel" aria-label="Close settings" title="Close">×</button>
+      </div>
+
+      <label class="field-label" for="api-key-input">Anthropic API key</label>
+      <input id="api-key-input" type="password" autocomplete="off" placeholder="sk-ant-..." />
+      <p class="help-text">Stored in this browser only. IndexedDB is recommended for future encrypted app data; this prototype uses localStorage for the user-provided key.</p>
+
+      <label class="field-label" for="model-input">Model</label>
+      <input id="model-input" type="text" value="claude-sonnet-4-6" />
+
+      <div class="dialog-actions">
+        <button class="danger-button" id="clear-button" type="button">Clear local data</button>
+        <button class="primary-button" id="save-button" value="default">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
